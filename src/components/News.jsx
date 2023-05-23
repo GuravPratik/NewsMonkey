@@ -1,21 +1,47 @@
 import React, { Component } from "react";
 import NewsItem from "./NewsItem";
 export default class News extends Component {
-  article = [];
   constructor() {
     super();
     this.state = {
-      articles: this.article,
+      articles: [],
+      page: 1,
     };
   }
   async componentDidMount() {
-    const url = `https://newsapi.org/v2/top-headlines?country=in&apiKey=${process.env.REACT_APP_NEWS_API}`;
+    const url = `https://newsapi.org/v2/top-headlines?country=in&apiKey=${process.env.REACT_APP_NEWS_API}&page=${this.state.page}&pagesize=20`;
     const data = await fetch(url);
     const parsedData = await data.json();
     this.setState({
       articles: parsedData.articles,
+      totalResults: parsedData.totalResults,
     });
   }
+
+  handlePrevClick = async () => {
+    const url = `https://newsapi.org/v2/top-headlines?country=in&apiKey=${
+      process.env.REACT_APP_NEWS_API
+    }&page=${this.state.page - 1}`;
+    const data = await fetch(url);
+    const parsedData = await data.json();
+    this.setState({
+      articles: parsedData.articles,
+      page: this.state.page - 1,
+    });
+  };
+
+  handleNextClick = async () => {
+    const url = `https://newsapi.org/v2/top-headlines?country=in&apiKey=${
+      process.env.REACT_APP_NEWS_API
+    }&page=${this.state.page + 1}`;
+    const data = await fetch(url);
+    const parsedData = await data.json();
+    this.setState({
+      articles: parsedData.articles,
+      page: this.state.page + 1,
+    });
+  };
+
   render() {
     return (
       <>
@@ -35,7 +61,7 @@ export default class News extends Component {
                     imageUrl={
                       article.urlToImage
                         ? article.urlToImage
-                        : "https://www.bonjourgroup.net/wp-content/uploads/2016/04/dummy-post-horisontal-thegem-blog-default.jpg"
+                        : "https://images.pexels.com/photos/242492/pexels-photo-242492.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
                     }
                     newsUrl={article.url}
                   />
@@ -43,6 +69,26 @@ export default class News extends Component {
               );
             })}
           </div>
+        </div>
+        <div className="container d-flex justify-content-between my-4">
+          <button
+            disabled={this.state.page <= 1}
+            type="button"
+            className="btn btn-primary"
+            onClick={this.handlePrevClick}
+          >
+            &larr; Previous
+          </button>
+          <button
+            disabled={
+              Math.ceil(this.state.totalResults / 20) < this.state.page + 1
+            }
+            type="button"
+            onClick={this.handleNextClick}
+            className="btn btn-primary"
+          >
+            Next &rarr;
+          </button>
         </div>
       </>
     );
