@@ -1,44 +1,58 @@
 import React, { Component } from "react";
 import NewsItem from "./NewsItem";
+import Spinner from "./Spinner";
 export default class News extends Component {
   constructor() {
     super();
     this.state = {
       articles: [],
       page: 1,
+      loading: false,
     };
   }
   async componentDidMount() {
-    const url = `https://newsapi.org/v2/top-headlines?country=in&apiKey=${process.env.REACT_APP_NEWS_API}&page=${this.state.page}&pagesize=20`;
+    const url = `https://newsapi.org/v2/top-headlines?country=in&apiKey=${process.env.REACT_APP_NEWS_API}&page=${this.state.page}&pagesize=${this.props.pageSize}`;
+    this.setState({
+      loading: true,
+    });
     const data = await fetch(url);
     const parsedData = await data.json();
     this.setState({
       articles: parsedData.articles,
       totalResults: parsedData.totalResults,
+      loading: false,
     });
   }
 
   handlePrevClick = async () => {
     const url = `https://newsapi.org/v2/top-headlines?country=in&apiKey=${
       process.env.REACT_APP_NEWS_API
-    }&page=${this.state.page - 1}`;
+    }&page=${this.state.page - 1}&pagesize=${this.props.pageSize}`;
+    this.setState({
+      loading: true,
+    });
     const data = await fetch(url);
     const parsedData = await data.json();
     this.setState({
       articles: parsedData.articles,
       page: this.state.page - 1,
+      loading: false,
     });
   };
 
   handleNextClick = async () => {
     const url = `https://newsapi.org/v2/top-headlines?country=in&apiKey=${
       process.env.REACT_APP_NEWS_API
-    }&page=${this.state.page + 1}`;
+    }&page=${this.state.page + 1}&pagesize=${this.props.pageSize}`;
+    this.setState({
+      loading: true,
+    });
     const data = await fetch(url);
     const parsedData = await data.json();
     this.setState({
       articles: parsedData.articles,
       page: this.state.page + 1,
+      loading: false,
     });
   };
 
@@ -47,8 +61,9 @@ export default class News extends Component {
       <>
         <div className="container my-4">
           <h1 className="my-4">NewsMonkey - Top Headlines</h1>
+          {this.state.loading && <Spinner />}
           <div className="row my-3">
-            {this.state.articles.map((article, index) => {
+            {!this.state.loading && this.state.articles.map((article, index) => {
               return (
                 <div className="col-md-4 my-3" key={index}>
                   <NewsItem
@@ -81,7 +96,8 @@ export default class News extends Component {
           </button>
           <button
             disabled={
-              Math.ceil(this.state.totalResults / 20) < this.state.page + 1
+              Math.ceil(this.state.totalResults / this.props.pageSize) <
+              this.state.page + 1
             }
             type="button"
             onClick={this.handleNextClick}
