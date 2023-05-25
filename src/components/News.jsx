@@ -10,21 +10,25 @@ function News(props) {
   const [totalResults, setTotalResults] = useState(0);
 
   useEffect(() => {
-    const updateNews = async () => {
-      const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${process.env.REACT_APP_NEWS_API_SECOND}&page=${page}&pageSize=${props.pageSize}`;
+    async function updateNews() {
+      const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${process.env.REACT_APP_NEWS_API}&page=${page}&pageSize=${props.pageSize}`;
       setLoading(true);
       let data = await fetch(url);
       let parsedData = await data.json();
       setArticels(parsedData.articles);
       setLoading(false);
       setTotalResults(parsedData.totalResults);
-    };
+    }
     updateNews();
   }, []);
 
   const fetchMoreData = async () => {
+    const url = `https://newsapi.org/v2/top-headlines?country=${
+      props.country
+    }&category=${props.category}&apiKey=${
+      process.env.REACT_APP_NEWS_API
+    }&page=${page + 1}&pageSize=${props.pageSize}`;
     setPage(page + 1);
-    const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${process.env.REACT_APP_NEWS_API_SECOND}&page=${page}&pageSize=${props.pageSize}`;
     let data = await fetch(url);
     let parsedData = await data.json();
     setArticels(articles.concat(parsedData.articles));
@@ -33,12 +37,14 @@ function News(props) {
 
   return (
     <>
-      <h1 className="my-4 text-center">NewsMonkey - Top Headlines</h1>
+      <h1 className="text-center" style={{ marginTop: "70px" }}>
+        NewsMonkey - Top Headlines
+      </h1>
       {loading && <Spinner />}
       <InfiniteScroll
         dataLength={articles.length}
         next={fetchMoreData}
-        hasMore={articles.length <= totalResults}
+        hasMore={articles.length !== totalResults}
         loader={<Spinner />}
       >
         <div className="container my-4">
