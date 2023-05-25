@@ -19,33 +19,38 @@ export default class News extends Component {
     super();
     this.state = {
       articles: [],
+      loading: true,
       page: 1,
-      loading: false,
+      totalResults: 0,
     };
   }
 
   async updateNews() {
-    const url = `https://newsapi.org/v2/top-headlines?country=in&category=${this.props.category}&apiKey=${process.env.REACT_APP_NEWS_API_SECOND}&page=${this.state.page}&pagesize=${this.props.pageSize}`;
-
-    const data = await fetch(url);
-    const parsedData = await data.json();
+    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${process.env.REACT_APP_NEWS_API_SECOND}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+    this.setState({ loading: true });
+    let data = await fetch(url);
+    let parsedData = await data.json();
     this.setState({
       articles: parsedData.articles,
       totalResults: parsedData.totalResults,
+      loading: false,
     });
   }
 
   async componentDidMount() {
-    await this.updateNews();
+    this.updateNews();
   }
 
   fetchMoreData = async () => {
-    this.setState({ page: this.state.page + 1 });
-    const url = `https://newsapi.org/v2/top-headlines?country=in&category=${this.props.category}&apiKey=${process.env.REACT_APP_NEWS_API_SECOND}&page=${this.state.page}&pagesize=${this.props.pageSize}`;
-    const data = await fetch(url);
-    const parsedData = await data.json();
+    this.setState({
+      page: this.state.page + 1,
+    });
+    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${process.env.REACT_APP_NEWS_API_SECOND}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+    let data = await fetch(url);
+    let parsedData = await data.json();
     this.setState({
       articles: this.state.articles.concat(parsedData.articles),
+      totalResults: parsedData.totalResults,
     });
   };
   render() {
@@ -80,10 +85,6 @@ export default class News extends Component {
                       author={article.author}
                       date={article.publishedAt}
                     />
-                    {console.log(
-                      this.state.articles.length,
-                      this.state.totalResults
-                    )}
                   </div>
                 );
               })}
